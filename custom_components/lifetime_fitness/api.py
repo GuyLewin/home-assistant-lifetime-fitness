@@ -86,7 +86,7 @@ class Api:
             try:
                 self.result_json = await self._get_visits()
             except ApiAuthExpired:
-                self.authenticate()
+                await self.authenticate()
                 # Try again after authenticating
                 self.result_json = await self._get_visits()
         except Exception as e:

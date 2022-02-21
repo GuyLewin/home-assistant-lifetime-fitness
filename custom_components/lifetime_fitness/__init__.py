@@ -1,17 +1,24 @@
-"""The lifetime-fitness integration."""
+"""Life Time Fitness integration."""
 from __future__ import annotations
+import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from .api import Api
-from .const import DOMAIN, CONF_USERNAME, CONF_PASSWORD
+from .const import DOMAIN, VERSION, ISSUE_URL, PLATFORM, CONF_USERNAME, CONF_PASSWORD
 
-PLATFORMS: list[str] = ["sensor"]
+PLATFORMS: list[str] = [PLATFORM]
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up lifetime-fitness from a config entry."""
+    _LOGGER.info(
+        "Version %s is starting, if you have any issues please report" " them here: %s",
+        VERSION,
+        ISSUE_URL,
+    )
     username, password = entry.data[CONF_USERNAME], entry.data[CONF_PASSWORD]
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = Api(hass, username, password)
 

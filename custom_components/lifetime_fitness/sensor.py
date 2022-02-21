@@ -24,13 +24,10 @@ async def async_setup_entry(hass, config_entry, async_add_devices):
     api_client = hass.data[DOMAIN][config_entry.entry_id]
     await api_client.authenticate()
 
-    new_devices = []
-    new_devices.append(
-        VisitsSensor(
-            api_client,
-            config_entry.options.get(CONF_START_OF_WEEK_DAY, DEFAULT_START_OF_WEEK_DAY),
-        )
-    )
+    new_devices = [VisitsSensor(
+        api_client,
+        config_entry.options.get(CONF_START_OF_WEEK_DAY, DEFAULT_START_OF_WEEK_DAY),
+    )]
 
     async_add_devices(new_devices)
 

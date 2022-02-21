@@ -1,6 +1,9 @@
 """Constants for the lifetime-fitness integration."""
 
 DOMAIN = "lifetime_fitness"
+VERSION = "0.0.0-dev"  # Updated by release workflow
+ISSUE_URL = "https://github.com/GuyLewin/home-assistant-lifetime-fitness"
+PLATFORM = "sensor"
 
 CONF_USERNAME = "username"
 CONF_PASSWORD = "password"
