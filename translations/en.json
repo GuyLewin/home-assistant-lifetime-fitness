@@ -1,0 +1,30 @@
+{
+    "config": {
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "password": "Password",
+                    "username": "Username"
+                },
+                "description": "API Authentication",
+                "title": "Life Time Fitness"
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "start_of_week_day": "First Day of the Week"
+                },
+                "description": "Integration Configuration",
+                "title": "Life Time Fitness"
+            }
+        }
+    }
+}

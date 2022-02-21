@@ -1,0 +1,17 @@
+{
+  "domain": "lifetime_fitness",
+  "name": "Life Time Fitness",
+  "config_flow": true,
+  "documentation": "https://github.com/GuyLewin/home-assistant-lifetime-fitness",
+  "issue_tracker": "https://github.com/GuyLewin/home-assistant-lifetime-fitness/issues",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": [],
+  "codeowners": [
+    "@GuyLewin"
+  ],
+  "iot_class": "cloud_polling",
+  "version": "0.0.0-dev"
+}

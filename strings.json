@@ -1,0 +1,30 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "username": "[%key:common::config_flow::data::username%]",
+          "password": "[%key:common::config_flow::data::password%]"
+        },
+        "description": "API Authentication",
+        "title": "Life Time Fitness"
+      }
+    },
+    "error": {
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "start_of_week_day": "First Day of the Week"
+        },
+        "description": "Integration Configuration",
+        "title": "Life Time Fitness"
+      }
+    }
+  }
+}
