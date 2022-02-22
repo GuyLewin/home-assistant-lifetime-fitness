@@ -6,8 +6,8 @@ from .api import Api
 from .const import (
     DOMAIN,
     UNIT_OF_MEASUREMENT,
-    VISITS_SENSOR_ID_PREFIX,
-    VISITS_SENSOR_NAME,
+    VISITS_SENSOR_ID_SUFFIX,
+    VISITS_SENSOR_NAME_SUFFIX,
     CONF_START_OF_WEEK_DAY,
     DEFAULT_START_OF_WEEK_DAY,
     API_CLUB_VISITS_TIMESTAMP_JSON_KEY,
@@ -37,7 +37,8 @@ class VisitsSensor(Entity):
 
     def __init__(self, api_client: Api, start_of_week_day: int):
         self._api_client = api_client
-        self._unique_id = f"{VISITS_SENSOR_ID_PREFIX}{api_client.get_username()}"
+        self._name = f"{api_client.get_username()}{VISITS_SENSOR_NAME_SUFFIX}"
+        self._unique_id = f"{api_client.get_username()}{VISITS_SENSOR_ID_SUFFIX}"
         self._start_of_week_day = start_of_week_day
         self._attr_extra_state_attributes = {}
 
@@ -47,7 +48,7 @@ class VisitsSensor(Entity):
 
     @property
     def name(self):
-        return VISITS_SENSOR_NAME
+        return self._name
 
     @property
     def available(self):
