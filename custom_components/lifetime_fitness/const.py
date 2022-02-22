@@ -1,4 +1,4 @@
-"""Constants for the lifetime-fitness integration."""
+"""Constants for the Life Time Fitness integration."""
 
 DOMAIN = "lifetime_fitness"
 VERSION = "0.0.0-dev"  # Updated by release workflow
@@ -30,10 +30,8 @@ API_AUTH_TOKEN_JSON_KEY = "ssoId"
 API_AUTH_STATUS_JSON_KEY = "status"
 API_AUTH_STATUS_OK = "0"
 
-API_CLUB_VISITS_ENDPOINT_FORMATSTRING = "https://myaccount.lifetimefitness.com/myaccount/api/member/clubvisits?end_date={end_date}&start_date={start_date}"
-API_CLUB_VISITS_ENDPOINT = (
-    "https://myaccount.lifetimefitness.com/myaccount/api/member/clubvisits"
-)
+API_CLUB_VISITS_ENDPOINT_FORMATSTRING = \
+    "https://myaccount.lifetimefitness.com/myaccount/api/member/clubvisits?end_date={end_date}&start_date={start_date}"
 API_CLUB_VISITS_ENDPOINT_DATE_FORMAT = "%Y-%m-%d"
 API_CLUB_VISITS_AUTH_HEADER = "X-LTF-SSOID"
 API_CLUB_VISITS_TIMESTAMP_JSON_KEY = "usageDateTime"

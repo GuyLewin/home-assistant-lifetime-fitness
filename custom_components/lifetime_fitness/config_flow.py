@@ -1,4 +1,4 @@
-"""Config flow for lifetime-fitness integration."""
+"""Config flow for Life Time Fitness integration."""
 from __future__ import annotations
 
 from collections import OrderedDict
@@ -91,6 +91,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         errors = {}
 
+        # noinspection PyBroadException
         try:
             info = await validate_input(self.hass, user_input)
         except CannotConnect:

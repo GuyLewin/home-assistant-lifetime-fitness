@@ -14,7 +14,6 @@ from .const import (
     API_AUTH_STATUS_OK,
     API_AUTH_TOKEN_JSON_KEY,
     API_CLUB_VISITS_ENDPOINT_FORMATSTRING,
-    API_CLUB_VISITS_ENDPOINT,
     API_CLUB_VISITS_ENDPOINT_DATE_FORMAT,
     API_CLUB_VISITS_AUTH_HEADER,
 )
@@ -68,27 +67,16 @@ class Api:
             response_json = await response.json()
             return response_json
 
-    async def _get_visits(self):
-        if self._sso_token is None:
-            raise ApiAuthRequired
-
-        async with self._clientsession.get(
-            API_CLUB_VISITS_ENDPOINT,
-            headers={API_CLUB_VISITS_AUTH_HEADER: self._sso_token},
-        ) as response:
-            if response.status == 401:
-                raise ApiAuthExpired
-            response_json = await response.json()
-            return response_json
-
     async def update(self):
+        today = date.today()
+        first_day_of_the_year = date(today.year, 1, 1)
         try:
             try:
-                self.result_json = await self._get_visits()
+                self.result_json = await self._get_visits_between_dates(first_day_of_the_year, today)
             except ApiAuthExpired:
                 await self.authenticate()
                 # Try again after authenticating
-                self.result_json = await self._get_visits()
+                self.result_json = await self._get_visits_between_dates(first_day_of_the_year, today)
         except Exception as e:
             self.update_successful = False
             raise e
