@@ -29,7 +29,7 @@ async def async_setup_entry(hass, config_entry, async_add_devices):
         config_entry.options.get(CONF_START_OF_WEEK_DAY, DEFAULT_START_OF_WEEK_DAY),
     )]
 
-    async_add_devices(new_devices)
+    async_add_devices(new_devices, True)
 
 
 class VisitsSensor(Entity):
