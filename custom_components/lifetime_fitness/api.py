@@ -1,6 +1,8 @@
 """API client for Life Time Fitness"""
-from aiohttp import ClientError
+from aiohttp import ClientError, ClientResponseError
 from datetime import date
+from http import HTTPStatus
+import logging
 
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
@@ -17,6 +19,8 @@ from .const import (
     API_CLUB_VISITS_ENDPOINT_DATE_FORMAT,
     API_CLUB_VISITS_AUTH_HEADER,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Api:
@@ -55,17 +59,20 @@ class Api:
         if self._sso_token is None:
             raise ApiAuthRequired
 
-        async with self._clientsession.get(
-            API_CLUB_VISITS_ENDPOINT_FORMATSTRING.format(
-                start_date=start_date.strftime(API_CLUB_VISITS_ENDPOINT_DATE_FORMAT),
-                end_date=end_date.strftime(API_CLUB_VISITS_ENDPOINT_DATE_FORMAT),
-            ),
-            headers={API_CLUB_VISITS_AUTH_HEADER: self._sso_token},
-        ) as response:
-            if response.status == 401:
+        try:
+            async with self._clientsession.get(
+                API_CLUB_VISITS_ENDPOINT_FORMATSTRING.format(
+                    start_date=start_date.strftime(API_CLUB_VISITS_ENDPOINT_DATE_FORMAT),
+                    end_date=end_date.strftime(API_CLUB_VISITS_ENDPOINT_DATE_FORMAT),
+                ),
+                headers={API_CLUB_VISITS_AUTH_HEADER: self._sso_token},
+            ) as response:
+                response_json = await response.json()
+                return response_json
+        except ClientResponseError as err:
+            if err.status == HTTPStatus.UNAUTHORIZED:
                 raise ApiAuthExpired
-            response_json = await response.json()
-            return response_json
+            raise err
 
     async def update(self):
         today = date.today()
@@ -79,6 +86,7 @@ class Api:
                 self.result_json = await self._get_visits_between_dates(first_day_of_the_year, today)
         except Exception as e:
             self.update_successful = False
+            _LOGGER.exception("Unexpected exception during Life Time API update")
             raise e
 
 
