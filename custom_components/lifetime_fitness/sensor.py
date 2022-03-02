@@ -75,7 +75,7 @@ class VisitsSensor(Entity):
                 visits_this_year += 1
                 if visit_date.month == today.month:
                     visits_this_month += 1
-            if visit_date > beginning_of_week_date:
+            if visit_date >= beginning_of_week_date:
                 visits_this_week += 1
             if last_visit_timestamp is None or visit_timestamp > last_visit_timestamp:
                 last_visit_timestamp = visit_timestamp
