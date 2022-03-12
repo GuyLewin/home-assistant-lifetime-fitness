@@ -1,5 +1,5 @@
 """API client for Life Time Fitness"""
-from aiohttp import ClientError, ClientResponseError
+from aiohttp import ClientError, ClientResponseError, ClientConnectionError
 from datetime import date
 from http import HTTPStatus
 import logging
@@ -49,10 +49,20 @@ class Api:
                 },
             ) as response:
                 response_json = await response.json()
-                if response_json[API_AUTH_STATUS_JSON_KEY] != API_AUTH_STATUS_OK:
+                if (
+                        API_AUTH_STATUS_JSON_KEY not in response_json
+                        or response_json[API_AUTH_STATUS_JSON_KEY] != API_AUTH_STATUS_OK
+                ):
+                    _LOGGER.error("Received invalid authentication response: %s", response_json)
                     raise ApiInvalidAuth
                 self._sso_token = response_json[API_AUTH_TOKEN_JSON_KEY]
-        except ClientError:
+        except ClientResponseError as err:
+            if err.status == HTTPStatus.UNAUTHORIZED:
+                _LOGGER.exception("Received invalid authentication status: %d", err.status)
+                raise ApiInvalidAuth
+            raise err
+        except ClientConnectionError:
+            _LOGGER.exception("Connection error while authenticating to Life Time API")
             raise ApiCannotConnect
 
     async def _get_visits_between_dates(self, start_date: date, end_date: date):
@@ -73,6 +83,9 @@ class Api:
             if err.status == HTTPStatus.UNAUTHORIZED:
                 raise ApiAuthExpired
             raise err
+        except ClientConnectionError:
+            _LOGGER.exception("Connection error while updating from Life Time API")
+            raise ApiCannotConnect
 
     async def update(self):
         today = date.today()
@@ -84,10 +97,9 @@ class Api:
                 await self.authenticate()
                 # Try again after authenticating
                 self.result_json = await self._get_visits_between_dates(first_day_of_the_year, today)
-        except Exception as e:
+        except ClientError:
             self.update_successful = False
             _LOGGER.exception("Unexpected exception during Life Time API update")
-            raise e
 
 
 class ApiCannotConnect(Exception):
