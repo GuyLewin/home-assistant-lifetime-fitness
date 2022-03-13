@@ -1,7 +1,6 @@
 """Config flow for Life Time Fitness integration."""
 from __future__ import annotations
 
-from collections import OrderedDict
 import logging
 from typing import Any
 
@@ -96,8 +95,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             info = await validate_input(self.hass, user_input)
         except CannotConnect:
             errors["base"] = "cannot_connect"
+        except PasswordNeedsToBeChanged:
+            errors["base"] = "password_needs_to_be_changed"
+        except TooManyAuthenticationAttempts:
+            errors["base"] = "too_many_authentication_attempts"
+        except ActivationRequired:
+            errors["base"] = "activation_required"
+        except DuplicateEmail:
+            errors["base"] = "duplicate_email"
         except InvalidAuth:
             errors["base"] = "invalid_auth"
+        except UnknownAuthError:
+            errors["base"] = "unknown_auth_error"
         except Exception:  # pylint: disable=broad-except
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
@@ -116,6 +125,26 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""
+
+
+class PasswordNeedsToBeChanged(HomeAssistantError):
+    """Error to indicate there the password needs to be changed."""
+
+
+class TooManyAuthenticationAttempts(HomeAssistantError):
+    """Error to indicate there were too many authentication attempts."""
+
+
+class ActivationRequired(HomeAssistantError):
+    """Error to indicate that account activation is required."""
+
+
+class DuplicateEmail(HomeAssistantError):
+    """Error to indicate there are multiple accounts associated with this email."""
+
+
+class UnknownAuthError(HomeAssistantError):
+    """Error to indicate server returned unexpected authentication error."""
 
 
 class InvalidAuth(HomeAssistantError):

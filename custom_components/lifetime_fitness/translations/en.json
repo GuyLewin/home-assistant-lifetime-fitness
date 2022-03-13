@@ -2,7 +2,12 @@
     "config": {
         "error": {
             "cannot_connect": "Failed to connect",
+            "password_needs_to_be_changed": "Password needs to be changed",
+            "too_many_authentication_attempts": "Too many attempts, your account has been locked",
+            "activation_required": "Account activation via email required",
+            "duplicate_email": "Your email is associated with more than one account. Please login with your username or member #",
             "invalid_auth": "Invalid authentication",
+            "unknown_auth_error": "Unexpected error status received from API. Check Home Assistant logs for more details and contact the developer",
             "unknown": "Unexpected error"
         },
         "step": {

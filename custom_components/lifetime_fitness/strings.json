@@ -12,7 +12,12 @@
     },
     "error": {
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "password_needs_to_be_changed": "[%key:common::config_flow::error::password_needs_to_be_changed%]",
+      "too_many_authentication_attempts": "[%key:common::config_flow::error::too_many_authentication_attempts%]",
+      "activation_required": "[%key:common::config_flow::error::activation_required%]",
+      "duplicate_email": "[%key:common::config_flow::error::duplicate_email%]",
       "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "unknown_auth_error": "[%key:common::config_flow::error::unknown_auth_error%]",
       "unknown": "[%key:common::config_flow::error::unknown%]"
     }
   },

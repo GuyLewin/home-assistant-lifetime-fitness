@@ -12,15 +12,45 @@ from .const import (
     API_AUTH_REQUEST_PASSWORD_JSON_KEY,
     API_AUTH_REQUEST_SUBSCRIPTION_KEY_HEADER,
     API_AUTH_REQUEST_SUBSCRIPTION_KEY_HEADER_VALUE,
-    API_AUTH_STATUS_JSON_KEY,
-    API_AUTH_STATUS_OK,
     API_AUTH_TOKEN_JSON_KEY,
+    API_AUTH_MESSAGE_JSON_KEY,
+    API_AUTH_STATUS_JSON_KEY,
     API_CLUB_VISITS_ENDPOINT_FORMATSTRING,
     API_CLUB_VISITS_ENDPOINT_DATE_FORMAT,
     API_CLUB_VISITS_AUTH_HEADER,
+    AuthenticationResults,
+    AUTHENTICATION_RESPONSE_MESSAGES,
+    AUTHENTICATION_RESPONSE_STATUSES
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def handle_authentication_response_json(response_json: dict):
+    # Based on https://my.lifetime.life/components/login/index.js
+    message = response_json.get(API_AUTH_MESSAGE_JSON_KEY)
+    status = response_json.get(API_AUTH_STATUS_JSON_KEY)
+    if message == AUTHENTICATION_RESPONSE_MESSAGES[AuthenticationResults.SUCCESS]:
+        return response_json[API_AUTH_TOKEN_JSON_KEY]
+    elif message == AUTHENTICATION_RESPONSE_MESSAGES[AuthenticationResults.PASSWORD_NEEDS_TO_BE_CHANGED]:
+        if API_AUTH_TOKEN_JSON_KEY in response_json:
+            _LOGGER.warning("Life Time password needs to be changed, but API can still be used")
+            return response_json[API_AUTH_TOKEN_JSON_KEY]
+        else:
+            raise ApiPasswordNeedsToBeChanged
+    elif (
+            status == AUTHENTICATION_RESPONSE_STATUSES[AuthenticationResults.INVALID] or
+            message == AUTHENTICATION_RESPONSE_MESSAGES[AuthenticationResults.INVALID]
+    ):
+        raise ApiInvalidAuth
+    elif status == AUTHENTICATION_RESPONSE_STATUSES[AuthenticationResults.TOO_MANY_ATTEMPTS]:
+        raise ApiTooManyAuthenticationAttempts
+    elif status == AUTHENTICATION_RESPONSE_STATUSES[AuthenticationResults.ACTIVATION_REQUIRED]:
+        raise ApiActivationRequired
+    elif status == AUTHENTICATION_RESPONSE_STATUSES[AuthenticationResults.DUPLICATE_EMAIL]:
+        raise ApiDuplicateEmail
+    _LOGGER.error("Received unknown authentication error in response: %s", response_json)
+    raise ApiUnknownAuthError
 
 
 class Api:
@@ -49,18 +79,12 @@ class Api:
                 },
             ) as response:
                 response_json = await response.json()
-                if (
-                        API_AUTH_STATUS_JSON_KEY not in response_json
-                        or response_json[API_AUTH_STATUS_JSON_KEY] != API_AUTH_STATUS_OK
-                ):
-                    _LOGGER.error("Received invalid authentication response: %s", response_json)
-                    raise ApiInvalidAuth
-                self._sso_token = response_json[API_AUTH_TOKEN_JSON_KEY]
+                self._sso_token = handle_authentication_response_json(response_json)
         except ClientResponseError as err:
             if err.status == HTTPStatus.UNAUTHORIZED:
-                _LOGGER.exception("Received invalid authentication status: %d", err.status)
                 raise ApiInvalidAuth
-            raise err
+            _LOGGER.error("Received unknown status code in authentication response: %d", err.status)
+            raise ApiUnknownAuthError
         except ClientConnectionError:
             _LOGGER.exception("Connection error while authenticating to Life Time API")
             raise ApiCannotConnect
@@ -106,8 +130,28 @@ class ApiCannotConnect(Exception):
     """Client can't connect to API server"""
 
 
+class ApiPasswordNeedsToBeChanged(Exception):
+    """Password needs to be changed"""
+
+
+class ApiTooManyAuthenticationAttempts(Exception):
+    """There were too many authentication attempts"""
+
+
+class ApiActivationRequired(Exception):
+    """Account activation required"""
+
+
+class ApiDuplicateEmail(Exception):
+    """There are multiple accounts associated with this email"""
+
+
 class ApiInvalidAuth(Exception):
     """API server returned invalid auth"""
+
+
+class ApiUnknownAuthError(Exception):
+    """API server returned unknown error"""
 
 
 class ApiAuthRequired(Exception):
