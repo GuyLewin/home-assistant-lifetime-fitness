@@ -1,10 +1,8 @@
 """API client for Life Time Fitness"""
-from aiohttp import ClientError, ClientResponseError, ClientConnectionError
+from aiohttp import ClientSession, ClientError, ClientResponseError, ClientConnectionError
 from datetime import date
 from http import HTTPStatus
 import logging
-
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .const import (
     API_AUTH_ENDPOINT,
@@ -54,10 +52,10 @@ def handle_authentication_response_json(response_json: dict):
 
 
 class Api:
-    def __init__(self, hass, username: str, password: str) -> None:
+    def __init__(self, client_session: ClientSession, username: str, password: str) -> None:
         self._username = username
         self._password = password
-        self._clientsession = async_create_clientsession(hass)
+        self._client_session = client_session
         self._sso_token = None
 
         self.update_successful = True
@@ -68,7 +66,7 @@ class Api:
 
     async def authenticate(self):
         try:
-            async with self._clientsession.post(
+            async with self._client_session.post(
                 API_AUTH_ENDPOINT,
                 json={
                     API_AUTH_REQUEST_USERNAME_JSON_KEY: self._username,
@@ -94,12 +92,15 @@ class Api:
             raise ApiAuthRequired
 
         try:
-            async with self._clientsession.get(
+            async with self._client_session.get(
                 API_CLUB_VISITS_ENDPOINT_FORMATSTRING.format(
                     start_date=start_date.strftime(API_CLUB_VISITS_ENDPOINT_DATE_FORMAT),
                     end_date=end_date.strftime(API_CLUB_VISITS_ENDPOINT_DATE_FORMAT),
                 ),
-                headers={API_CLUB_VISITS_AUTH_HEADER: self._sso_token},
+                headers={
+                    API_CLUB_VISITS_AUTH_HEADER: self._sso_token,
+                    API_AUTH_REQUEST_SUBSCRIPTION_KEY_HEADER: API_AUTH_REQUEST_SUBSCRIPTION_KEY_HEADER_VALUE
+                },
             ) as response:
                 response_json = await response.json()
                 return response_json
@@ -160,3 +161,18 @@ class ApiAuthRequired(Exception):
 
 class ApiAuthExpired(Exception):
     """Authentication has expired"""
+
+
+# Test the API client by running this script with username and password:
+async def main():
+    import sys, aiohttp
+    username, password = sys.argv[1:]
+    async with aiohttp.ClientSession() as client_session:
+        api = Api(client_session, username, password)
+        await api.authenticate()
+        await api.update()
+        print(api.result_json)
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

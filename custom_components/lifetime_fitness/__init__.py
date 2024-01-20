@@ -4,6 +4,7 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .api import Api
 from .const import DOMAIN, VERSION, ISSUE_URL, PLATFORM, CONF_USERNAME, CONF_PASSWORD
@@ -20,7 +21,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ISSUE_URL,
     )
     username, password = entry.data[CONF_USERNAME], entry.data[CONF_PASSWORD]
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = Api(hass, username, password)
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = Api(async_create_clientsession(hass), username, password)
 
     entry.async_on_unload(entry.add_update_listener(options_update_listener))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
