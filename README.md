@@ -1,3 +1,8 @@
+# ⚠️ Repo Deprecated
+I'm not maintaining this repository any more. There's a fork in active maintenance available [here](https://github.com/jsheputis/home-assistant-lifetime-fitness).
+
+-------
+
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/GuyLewin/home-assistant-lifetime-fitness)
 
 # About
